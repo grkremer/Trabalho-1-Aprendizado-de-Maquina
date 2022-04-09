@@ -65,6 +65,15 @@ def split_validation_df(data, percentage=0.1):
         model_df.drop(item.index, inplace=True)
     return validation_df, model_df
 
+def fix_undersampling(data, feature, under_value=1):
+    n_samples = data[feature].where(data[feature] == under_value).count()
+    while data[feature].where(data[feature] != under_value).count() > n_samples:
+        item = data.sample()
+        while item[feature] == under_value:
+            item = data.sample()
+        data.drop(item.index, inplace=True)
+    return data
+
 
 #def split_in_folds2(data, k):
 #    max_fold_size = ceil(data["id"].count()/k)

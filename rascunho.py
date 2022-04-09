@@ -5,31 +5,37 @@ from sklearn.neighbors import KNeighborsClassifier
 from funcoes_de_processamento import k_fold, split_validation_df
 import pandas as pd
 
-data = pd.read_csv("data.csv")
+data = pd.read_csv("healthcare-dataset-stroke-data.csv")
 
 
-knn_classifier = KNeighborsClassifier(n_neighbors=3)
-dt_classifier = DecisionTreeClassifier(random_state=0)
- 
-validation_df, model_df = split_validation_df(data)
-#print(validation_df.describe())
-#print(model_df.describe())
-fold_sets = k_fold(model_df, 10)
 
-features = data.columns
-lista_features = features.to_list()
-lista_features.remove("diagnosis")
-lista_features.remove("id")
-lista_features.remove("Unnamed: 32")
+def fix_undersampling(data, feature, under_value=1):
+    under_count = data[feature].where(data[feature] == under_value).count()
+    greater_count = data[feature].where(data[feature] != under_value).count()
+    while greater_count > under_count:
+        print(greater_count)
+        item = data.sample()
+        while item[feature].where(data[feature] == under_value).count() == 0:
+            item = data.sample()
+        data.drop(item.index, inplace=True)
+        greater_count -= 1
+    return data
 
-for fold_set in fold_sets:
-    training_df = fold_set["training_data"]
-    testing_df = fold_set["test_data"]
+def fix_undersampling2(data, feature, under_value=1):
+    under_count = data[feature].where(data[feature] == under_value).count()
+    apenas_under = data.where(data[feature] == under_value)
+    apenas_not_under = data.where(data[feature] != under_value)
+    print(apenas_under.count())
+    print(apenas_not_under.count())
+    item = apenas_not_under.sample()
+    apenas_not_under.drop(item.index, inplace=True)
+    dados = item
+    for i in range(1, under_count):
+        item = apenas_not_under.sample()
+        apenas_not_under.drop(item.index, inplace=True)
+        dados = pd.concat([dados,item])
+    dados = pd.concat([dados, apenas_under])
+    return dados
 
-    Xtraining = training_df[lista_features]
-    ytraining = training_df["diagnosis"]
-
-print(f"Xtreino {training_df.describe()}")
-print(f"ytreino {testing_df.describe()}")
-print(f"dados {validation_df.describe()}")
-#print(fold_set["training_data"])
+dados = fix_undersampling(data,"stroke",1)
+print(dados.count())
