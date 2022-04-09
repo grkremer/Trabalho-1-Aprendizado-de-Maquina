@@ -42,11 +42,9 @@ def fold_to_df(fold):
 
 def k_fold(data, k=5):
     data_clone = deepcopy(data)
-    shuffle(data_clone)
     folds = split_in_folds(data_clone, k)
     fold_sets = []
     for fold_index, fold in enumerate(folds):
-        print(fold_index)
         test_fold = fold_to_df(fold)
         training_folds = deepcopy(folds)
         training_folds = training_folds[:fold_index]+training_folds[fold_index+1:]
@@ -54,6 +52,18 @@ def k_fold(data, k=5):
         training_folds = fold_to_df(training_folds)
         fold_sets.append({'training_data': training_folds, 'test_data': test_fold})
     return fold_sets
+
+def split_validation_df(data, percentage=0.1):
+    model_df = deepcopy(data)
+    validation_size = int(model_df["id"].count()*percentage)
+    item = model_df.sample()
+    validation_df = item
+    model_df.drop(item.index, inplace=True)
+    for item_index in range(1, validation_size):
+        item = model_df.sample()
+        validation_df = pd.concat([validation_df, item])
+        model_df.drop(item.index, inplace=True)
+    return validation_df, model_df
 
 
 #def split_in_folds2(data, k):
