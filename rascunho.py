@@ -23,8 +23,10 @@ def fix_undersampling(data, feature, under_value=1):
 
 def fix_undersampling2(data, feature, under_value=1):
     under_count = data[feature].where(data[feature] == under_value).count()
-    apenas_under = data.where(data[feature] == under_value)
-    apenas_not_under = data.where(data[feature] != under_value)
+    print("under count: " + str(under_count))
+    apenas_under = data.where(data[feature] == under_value).dropna(how='all')
+    apenas_not_under = data.where(data[feature] != under_value).dropna(how='all')
+    print(data.count())
     print(apenas_under.count())
     print(apenas_not_under.count())
     item = apenas_not_under.sample()
@@ -37,5 +39,5 @@ def fix_undersampling2(data, feature, under_value=1):
     dados = pd.concat([dados, apenas_under])
     return dados
 
-dados = fix_undersampling(data,"stroke",1)
+dados = fix_undersampling2(data,"stroke",1)
 print(dados.count())
