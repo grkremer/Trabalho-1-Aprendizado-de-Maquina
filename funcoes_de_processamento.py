@@ -22,11 +22,23 @@ def split_in_folds(data, k):
         folds.append([])
         for item_index in range(max_fold_size):
             item = data.sample()
-            data.drop(item.index)
+            data.drop(item.index, inplace=True)
             folds[fold_index].append(item)
             if data.empty:
                 break
     return folds
+
+def merge_folds(folds):
+    result = []
+    for fold in folds:
+        result += fold
+    return result
+
+def fold_to_df(fold):
+    df = fold[0]
+    for item_index in range(1, len(fold)):
+        df = pd.concat([df, fold[item_index]])
+    return df
 
 def k_fold(data, k=5):
     data_clone = deepcopy(data)
@@ -34,17 +46,41 @@ def k_fold(data, k=5):
     folds = split_in_folds(data_clone, k)
     fold_sets = []
     for fold_index, fold in enumerate(folds):
-        test_fold = fold
+        print(fold_index)
+        test_fold = fold_to_df(fold)
         training_folds = deepcopy(folds)
-        training_folds = training_folds[:fold_index]+training_folds[fold_index:]
-        training_folds_df = []
-        for training_fold in training_folds:
-            training_fold_df = training_fold[0]
-            for training_item_index in range(1, len(training_fold)):
-                pd.concat(training_fold_df, training_fold[training_item_index])
-            training_folds_df.append(training_fold_df)
-        fold_sets.append({'training_folds': training_folds_df, 'test_fold': test_fold})
+        training_folds = training_folds[:fold_index]+training_folds[fold_index+1:]
+        training_folds = merge_folds(training_folds)
+        training_folds = fold_to_df(training_folds)
+        fold_sets.append({'training_data': training_folds, 'test_data': test_fold})
     return fold_sets
+
+
+#def split_in_folds2(data, k):
+#    max_fold_size = ceil(data["id"].count()/k)
+#    folds = []
+#    for fold_index in range(k):
+#        folds.append([])
+#        for item_index in range(max_fold_size):
+#            item = data.sample()
+#            id = item["id"]
+#            data.drop(item.index)
+#            folds[fold_index].append(id)
+#            if data.empty:
+#                break
+#    return folds
+
+#def k_fold2(data, k=5):
+#    data_clone = deepcopy(data)
+#    shuffle(data_clone)
+#    folds = split_in_folds(data_clone, k)
+#    fold_sets = []
+#    for fold_index, fold in enumerate(folds):
+#        test_fold = fold
+#        training_folds = deepcopy(folds)
+#        training_folds = training_folds[:fold_index]+training_folds[fold_index+1:]
+#       fold_sets.append({'training_folds': training_folds, 'test_fold': test_fold})
+#    return fold_sets
 
 def get_confusion_matrix(tp, fn, fp, tn):
     return {'tp':tp, 'fn':fn, 'fp':fp, 'tn':tn}

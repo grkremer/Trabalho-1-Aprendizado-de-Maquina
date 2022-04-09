@@ -12,8 +12,8 @@ knn_classifier = KNeighborsClassifier(n_neighbors=3)
 dt_classifier = DecisionTreeClassifier(random_state=0)
 
 for fold_set in fold_sets:
-    Xtraining = fold_set["training_folds"]
-    ytraining = fold_set["training_folds"]
+    Xtraining = fold_set["training_data"]
+    ytraining = fold_set["training_data"]
     #knn_classifier.fit(X,y)
 
-print(fold_set["training_folds"])
+#print(fold_set["training_data"])
