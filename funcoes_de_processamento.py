@@ -101,9 +101,27 @@ def fix_undersampling(data, feature, under_value=1):
 #       fold_sets.append({'training_folds': training_folds, 'test_fold': test_fold})
 #    return fold_sets
 
-def get_confusion_matrix(tp, fn, fp, tn):
+def get_confusion_matrix(results:list, expected:list):
+    tp = fn = fp = tn = 0
+    for index, result in enumerate(results):
+        if result == 1 and expected[index] == 1:
+            tp += 1
+        elif result == 0 and expected[index] == 0:
+            tn += 1
+        elif result == 1 and expected[index] == 0:
+            fp += 1
+        elif result == 0 and expected[index] == 1:
+            fn += 1
     return {'tp':tp, 'fn':fn, 'fp':fp, 'tn':tn}
 
-def get_sensitivity(confusion_matrix):
+def get_recall(confusion_matrix):
     return confusion_matrix['tp']/(confusion_matrix['tp']+confusion_matrix['fn'])
 
+def get_precision(confusion_matrix):
+    return confusion_matrix['tp']/(confusion_matrix['tp']+confusion_matrix['fp'])
+
+def get_accuracy(confusion_matrix):
+    return (confusion_matrix['tp']+confusion_matrix['tn'])/(confusion_matrix['tp']+confusion_matrix['tn']+confusion_matrix['fp']+confusion_matrix['fn'])
+
+def get_f1_score(confusion_matrix):
+    return (2*confusion_matrix['tp'])/(2*confusion_matrix['tp']+confusion_matrix['fp']+confusion_matrix['fn'])
